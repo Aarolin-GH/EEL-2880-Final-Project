@@ -1,0 +1,10 @@
++ n b q k b n +
+p p p p p p p p
+_ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+P P P P P P P P
+# N B Q K B N #
+Move: 1
+Turn: 0

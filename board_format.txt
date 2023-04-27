@@ -1,0 +1,15 @@
++ n b q k b n +
+p p p p p p p p
+_ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+P P P P P P P P
+# N B Q K B N #
+Move: ???
+Turn: ???
+
+# = Castle-able White Rook
++ = Castle-able Black Rook
+9 = Just-moved White Pawn
+6 = Just-moved Black Pawn
