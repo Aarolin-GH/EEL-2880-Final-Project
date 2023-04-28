@@ -8,6 +8,7 @@
 #define defaultBoard "board_tester.txt"
 #define debug 1
 
+int getTeam(char testChar);
 void loadBoard(char boardState[8][8], int *moveNumber, int *turn,
                char filetoread[]);
 void saveBoard(char boardState[][8], int moveNumber, int turn, char filename[]);
@@ -18,8 +19,11 @@ void copyBoard(char destBoard[8][8], char srcBoard[8][8]);
 void flattenPieces(char inputPieces[8][8], char flattenedPieces[8][8]);
 void makeMove(char boardState[8][8], char inputMove[8]);
 int isInCheck(char boardState[8][8], int color);
+int drctnKngChck(char boardState[8][8], int coord1, int coord2, int x_offset,
+                 int y_offset, int movelimit, int color);
 int hasValidMoves(char boardState[8][8], int color);
 void printTitle(void);
+
 
 int main(void) {
   int moveNumber = 1, turn = white; // 0 = white, 1 = black
@@ -87,7 +91,7 @@ int main(void) {
         break;
       default:
         strcpy(displayMessage, "");
-      } //Main Menu Options
+      } // Main Menu Options
       break;
 
     case 1:
@@ -97,6 +101,7 @@ int main(void) {
         // printf("%d",isInCheck(boardState,turn));
         if (debug) {
           printf("Processed Move: %s\n", validmove);
+          printf("Is in Check?: %d\n", isInCheck(boardState, turn));
         }
         printf("Move #%d\n\n", moveNumber);
         printboard(boardState);
@@ -143,7 +148,6 @@ exit_program:
   printf("     (ASCII Art Archive)\n");
   printf("Text to ASCII Art Generator by patorjk\n");
   printf("     http://patorjk.com/");
-  
 
   return 0;
 }
@@ -187,7 +191,7 @@ void printboard(char boardState[8][8]) {
   printf("\n");
 }
 
-void printTitle(void){
+void printTitle(void) {
   printf(" _______  _______  __   __  _______   |\\_\n");
   printf("|       ||       ||  |_|  ||       | /  .\\_\n");
   printf("|_     _||    ___||       ||_     _||   ___)\n");
@@ -271,7 +275,8 @@ XYxyKM = White King Move (Depower White Rooks)
   int i, flag;
 
   if (strcmp(inputMove, "o-o-o") == 0) {
-    printf("Castling Detected!");
+    if (debug)
+      printf("Castling Detected!");
     for (i = 0, flag = 0; i < 8; i++) {
       if ((boardState[0][i] == '+') && flag == 0) {
         boardState[0][i] = '_';
@@ -288,7 +293,8 @@ XYxyKM = White King Move (Depower White Rooks)
     boardState[0][3] = 'r';
   } // Black Queenside Castling
   else if (strcmp(inputMove, "o-o") == 0) {
-    printf("Castling Detected!");
+    if (debug)
+      printf("Castling Detected!");
     for (i = 0, flag = 0; i < 8; i++) {
       if ((boardState[0][i] == '+') && flag == 0) {
         boardState[0][i] = 'r';
@@ -305,7 +311,8 @@ XYxyKM = White King Move (Depower White Rooks)
     boardState[0][5] = 'r';
   } // Black Kingside Castling
   else if (strcmp(inputMove, "O-O-O") == 0) {
-    printf("Castling Detected!");
+    if (debug)
+      printf("Castling Detected!");
     for (i = 0, flag = 0; i < 8; i++) {
       if ((boardState[7][i] == '#') && flag == 0) {
         boardState[7][i] = '_';
@@ -322,7 +329,8 @@ XYxyKM = White King Move (Depower White Rooks)
     boardState[7][3] = 'R';
   } // White Queenside Castling
   else if (strcmp(inputMove, "O-O") == 0) {
-    printf("Castling Detected!");
+    if (debug)
+      printf("Castling Detected!");
     for (i = 0, flag = 0; i < 8; i++) {
       if ((boardState[7][i] == '#') && flag == 0) {
         boardState[7][i] = 'R';
@@ -392,366 +400,84 @@ void saveBoard(char boardState[][8], int moveNumber, int turn,
 
 int isInCheck(char boardState[8][8], int color) {
   int i1, i2, j1, j2, k1, k2;
-  int checkFlag = 0;
-  char temp_board[8][8];
   char chChar;
 
   for (i1 = 0; i1 < 8; i1++) {
     for (i2 = 0; i2 < 8; i2++) {
-
-      copyBoard(temp_board, boardState);
-      switch (temp_board[i1][i2]) {
+      chChar = boardState[i1][i2];
+      switch (chChar) {
+      case '_':
+        continue;
       case 'p':
       case '6':
-        if ((i2 > 0) && (i1 < 7) && color == white) {
-          if (temp_board[i1 + 1][i2 - 1] == 'K')
-            temp_board[i1 + 1][i2 - 1] = 'T';
-        }
-        if ((i2 < 7) && (i1 < 7) && color == white) {
-          if (temp_board[i1 + 1][i2 + 1] == 'K')
-            temp_board[i1 + 1][i2 + 1] = 'T';
+        if (getTeam(chChar) == !color) {
+          if (drctnKngChck(boardState, i2, i1, 1, 1, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, -1, 1, 1, color))
+            return 1;
         }
         break;
       case 'P':
       case '9':
-        if ((i2 > 0) && (i1 > 0) && color == black) {
-          if (temp_board[i1 - 1][i2 - 1] == 'k')
-            temp_board[i1 - 1][i2 - 1] = 'T';
-        }
-        if ((i2 < 7) && (i1 > 0) && color == black) {
-          if (temp_board[i1 - 1][i2 + 1] == 'k')
-            temp_board[i1 - 1][i2 + 1] = 'T';
+        if (getTeam(chChar) == !color) {
+          if (drctnKngChck(boardState, i2, i1, 1, -1, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, -1, -1, 1, color))
+            return 1;
         }
         break;
       case 'n':
-        if (color == white) {
-          if ((i1 > 0)) {
-            if (i2 > 1) {
-              if (temp_board[i1 - 1][i2 - 2] == 'K') {
-                temp_board[i1 - 1][i2 - 2] = 'T';
-              }
-            }
-            if (i2 < 6) {
-              if (temp_board[i1 - 1][i2 + 2] == 'K') {
-                temp_board[i1 - 1][i2 + 2] = 'T';
-              }
-            }
-          }
-          if ((i1 > 1)) {
-            if (i2 > 0) {
-              if (temp_board[i1 - 2][i2 - 1] == 'K') {
-                temp_board[i1 - 2][i2 - 1] = 'T';
-              }
-            }
-            if (i2 < 7) {
-              if (temp_board[i1 - 2][i2 + 1] == 'K') {
-                temp_board[i1 - 2][i2 + 1] = 'T';
-              }
-            }
-          }
-          if ((i1 < 6)) {
-            if (i2 > 0) {
-              if (temp_board[i1 + 2][i2 - 1] == 'K') {
-                temp_board[i1 + 2][i2 - 1] = 'T';
-              }
-            }
-            if (i2 < 7) {
-              if (temp_board[i1 + 2][i2 + 1] == 'K') {
-                temp_board[i1 + 2][i2 + 1] = 'T';
-              }
-            }
-          }
-          if ((i1 < 7)) {
-            if (i2 > 1) {
-              if (temp_board[i1 + 1][i2 - 2] == 'K') {
-                temp_board[i1 + 1][i2 - 2] = 'T';
-              }
-            }
-            if (i2 < 6) {
-              if (temp_board[i1 + 1][i2 + 2] == 'K') {
-                temp_board[i1 + 1][i2 + 2] = 'T';
-              }
-            }
-          }
-        }
-        break;
       case 'N':
-        if (color == black) {
-          if ((i1 > 0)) {
-            if (i2 > 1) {
-              if (temp_board[i1 - 1][i2 - 2] == 'k') {
-                temp_board[i1 - 1][i2 - 2] = 'T';
-              }
-            }
-            if (i2 < 6) {
-              if (temp_board[i1 - 1][i2 + 2] == 'k') {
-                temp_board[i1 - 1][i2 + 2] = 'T';
-              }
-            }
-          }
-          if ((i1 > 1)) {
-            if (i2 > 0) {
-              if (temp_board[i1 - 2][i2 - 1] == 'k') {
-                temp_board[i1 - 2][i2 - 1] = 'T';
-              }
-            }
-            if (i2 < 7) {
-              if (temp_board[i1 - 2][i2 + 1] == 'k') {
-                temp_board[i1 - 2][i2 + 1] = 'T';
-              }
-            }
-          }
-          if ((i1 < 6)) {
-            if (i2 > 0) {
-              if (temp_board[i1 + 2][i2 - 1] == 'k') {
-                temp_board[i1 + 2][i2 - 1] = 'T';
-              }
-            }
-            if (i2 < 7) {
-              if (temp_board[i1 + 2][i2 + 1] == 'k') {
-                temp_board[i1 + 2][i2 + 1] = 'T';
-              }
-            }
-          }
-          if ((i1 < 7)) {
-            if (i2 > 1) {
-              if (temp_board[i1 + 1][i2 - 2] == 'k') {
-                temp_board[i1 + 1][i2 - 2] = 'T';
-              }
-            }
-            if (i2 < 6) {
-              if (temp_board[i1 + 1][i2 + 2] == 'k') {
-                temp_board[i1 + 1][i2 + 2] = 'T';
-              }
-            }
-          }
+        if (getTeam(chChar) == !color) {
+          if (drctnKngChck(boardState, i2, i1, 1, 2, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, -1, 2, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, 1, -2, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, -1, -2, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, 2, 1, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, -2, 1, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, 2, -1, 1, color))
+            return 1;
+          if (drctnKngChck(boardState, i2, i1, -2, -1, 1, color))
+            return 1;
         }
         break;
-      default:
-        chChar = temp_board[i1][i2];
-        if (chChar == 'q' || chChar == 'r' || chChar == '+') {
-          if (color == white) {
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 + j1) > 7) {
-                break;
-              } else if (temp_board[i1][i2 + j1] == 'K') {
-                temp_board[i1][i2 + j1] = 'T';
-                break;
-              } else if (temp_board[i1][i2 + j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check white kings going right
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 - j1) < 0) {
-                break;
-              } else if (temp_board[i1][i2 - j1] == 'K') {
-                temp_board[i1][i2 - j1] = 'T';
-                break;
-              } else if (temp_board[i1][i2 - j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check white kings going left
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i1 + j1) > 7) {
-                break;
-              } else if (temp_board[i1 + j1][i2] == 'K') {
-                temp_board[i1 + j1][i2] = 'T';
-                break;
-              } else if (temp_board[i1 + j1][i2] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check white kings going down
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i1 - j1) < 0) {
-                break;
-              } else if (temp_board[i1 - j1][i2] == 'K') {
-                temp_board[i1 - j1][i2] = 'T';
-                break;
-              } else if (temp_board[i1 - j1][i2] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check white kings going up
-          }
-        }
-        if (chChar == 'q' || chChar == 'b') {
-          if (color == white) {
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 + j1) > 7 || (i1 + j1) > 7) {
-                break;
-              } else if (temp_board[i1 + j1][i2 + j1] == 'K') {
-                temp_board[i1 + j1][i2 + j1] = 'T';
-                break;
-              } else if (temp_board[i1 + j1][i2 + j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // down right
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 - j1) < 0 || (i1 + j1 > 7)) {
-                break;
-              } else if (temp_board[i1 + j1][i2 - j1] == 'K') {
-                temp_board[i1 + j1][i2 - j1] = 'T';
-                break;
-              } else if (temp_board[i1][i2 - j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // down left
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 + j1) > 7 || (i1 - j1) < 0) {
-                break;
-              } else if (temp_board[i1 - j1][i2 + j1] == 'K') {
-                temp_board[i1 - j1][i2 + j1] = 'T';
-                break;
-              } else if (temp_board[i1 - j1][i2 + j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // up right
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i1 - j1) < 0 || (i2 - j1) < 0) {
-                break;
-              } else if (temp_board[i1 - j1][i2 - j1] == 'K') {
-                temp_board[i1 - j1][i2 - j1] = 'T';
-                break;
-              } else if (temp_board[i1 - j1][i2 - j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // up left
-          }
-        }
-        if (chChar == 'Q' || chChar == 'B') {
-          if (color == black) {
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 + j1) > 7 || (i1 + j1) > 7) {
-                break;
-              } else if (temp_board[i1 + j1][i2 + j1] == 'k') {
-                temp_board[i1 + j1][i2 + j1] = 'T';
-                break;
-              } else if (temp_board[i1 + j1][i2 + j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // down right
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 - j1) < 0 || (i1 + j1 > 7)) {
-                break;
-              } else if (temp_board[i1 + j1][i2 - j1] == 'k') {
-                temp_board[i1 + j1][i2 - j1] = 'T';
-                break;
-              } else if (temp_board[i1][i2 - j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // down left
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 + j1) > 7 || (i1 - j1) < 0) {
-                break;
-              } else if (temp_board[i1 - j1][i2 + j1] == 'k') {
-                temp_board[i1 - j1][i2 + j1] = 'T';
-                break;
-              } else if (temp_board[i1 - j1][i2 + j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // up right
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i1 - j1) < 0 || (i2 - j1) < 0) {
-                break;
-              } else if (temp_board[i1 - j1][i2 - j1] == 'k') {
-                temp_board[i1 - j1][i2 - j1] = 'T';
-                break;
-              } else if (temp_board[i1 - j1][i2 - j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // up left
-          }
-        }
-        if (chChar == 'Q' || chChar == 'R' || chChar == '#') {
-          if (color == black) {
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 + j1) > 7) {
-                break;
-              } else if (temp_board[i1][i2 + j1] == 'k') {
-                temp_board[i1][i2 + j1] = 'T';
-                break;
-              } else if (temp_board[i1][i2 + j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check black kings going right
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i2 - j1) < 0) {
-                break;
-              } else if (temp_board[i1][i2 - j1] == 'k') {
-                temp_board[i1][i2 - j1] = 'T';
-                break;
-              } else if (temp_board[i1][i2 - j1] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check black kings going left
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i1 + j1) > 7) {
-                break;
-              } else if (temp_board[i1 + j1][i2] == 'k') {
-                temp_board[i1 + j1][i2] = 'T';
-                break;
-              } else if (temp_board[i1 + j1][i2] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check black kings going down
-            for (j1 = 1; j1 < 8; j1++) {
-              if ((i1 - j1) < 0) {
-                break;
-              } else if (temp_board[i1 - j1][i2] == 'k') {
-                temp_board[i1 - j1][i2] = 'T';
-                break;
-              } else if (temp_board[i1 - j1][i2] == '_') {
-                continue;
-              } else {
-                break;
-              }
-            } // check black kings going up
-          }
-        }
-        // sets Exposed Kings to 'T' based on color
-      }
-      for (j1 = 0; j1 < 8; j1++) {
-        for (j2 = 0; j2 < 8; j2++) {
-          if (temp_board[j1][j2] == 'T') {
-            checkFlag = 1;
-            goto exit;
-          }
-        }
 
-      } // Exits if Exposed King Found
+      default:
+        if (chChar == 'q' || chChar == 'r' || chChar == '+' || chChar == 'Q' ||
+            chChar == 'R' || chChar == '#') {
+          if (getTeam(chChar) == !color) {
+            if (drctnKngChck(boardState, i2, i1, 1, 0, 8, color))
+              return 1;
+            if (drctnKngChck(boardState, i2, i1, -1, 0, 8, color))
+              return 1;
+            if (drctnKngChck(boardState, i2, i1, 0, 1, 8, color))
+              return 1;
+            if (drctnKngChck(boardState, i2, i1, 0, -1, 8, color))
+              return 1;
+          }
+        }
+        if (chChar == 'q' || chChar == 'b' || chChar == 'Q' || chChar == 'B') {
+          if (getTeam(chChar) == !color) {
+            if (drctnKngChck(boardState, i2, i1, 1, 1, 8, color))
+              return 1;
+            if (drctnKngChck(boardState, i2, i1, 1, -1, 8, color))
+              return 1;
+            if (drctnKngChck(boardState, i2, i1, -1, 1, 8, color))
+              return 1;
+            if (drctnKngChck(boardState, i2, i1, -1, -1, 8, color))
+              return 1;
+          }
+        }
+      }
     }
-  } // Runs checks on every piece
-exit:
-  return checkFlag;
+  }
+  return 0;
 }
 
 int hasValidMoves(char boardState[8][8], int color) {
@@ -768,7 +494,7 @@ int hasValidMoves(char boardState[8][8], int color) {
           inputMove[1] = 49 + i2;
           inputMove[2] = 97 + j1;
           inputMove[3] = 49 + j2;
-          inputMove[4] = '/0';
+          inputMove[4] = '\0';
 
           validateMove(boardState, color, inputMove, outputMove);
           if (outputMove[0] > 10)
@@ -802,5 +528,59 @@ void copyBoard(char destBoard[8][8], char srcBoard[8][8]) {
     for (int j = 0; j < 8; j++) {
       destBoard[i][j] = srcBoard[i][j];
     }
+  }
+}
+int drctnKngChck(char boardState[8][8], int coord1, int coord2, int x_offset,
+                 int y_offset, int movelimit, int color) {
+  int i1 = coord2;
+  int i2 = coord1;
+  for (int i = 0; i < movelimit; i++) {
+    i1 += y_offset;
+    i2 += x_offset;
+    if (i1 > 7 || i1 < 0 || i2 > 7 || i2 < 0)
+      return 0;
+    if (boardState[i1][i2] == 'k') {
+      if (color == black) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    if (boardState[i1][i2] == 'K') {
+      if (color == white) {
+        return 1;
+      } else {
+        return 0;
+      }
+    }
+    if (boardState[i1][i2] == '_')
+      continue;
+    return 0;
+  }
+  return 0;
+}
+int getTeam(char testChar) {
+  switch (testChar) {
+  case 'K':
+  case 'B':
+  case 'R':
+  case 'Q':
+  case 'N':
+  case '#':
+  case 'P':
+  case '9':
+    return white;
+    break;
+  case 'k':
+  case 'b':
+  case 'r':
+  case 'q':
+  case 'n':
+  case '+':
+  case 'p':
+  case '6':
+    return black;
+  default:
+    return -1;
   }
 }
