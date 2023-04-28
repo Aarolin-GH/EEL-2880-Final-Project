@@ -1,11 +1,11 @@
-+ n b q k b n +
-p p p p p p p p
-_ _ _ _ _ _ _ _
-_ _ _ _ i _ _ _
 _ _ _ _ _ _ _ _
 _ _ _ _ _ _ _ _
-P P Q _ _ _ _ P
-# N B Q _ _ _ #
-Move: 2
-Turn: 0
+_ _ _ _ _ _ _ _
+q n _ _ _ _ _ _
+k n _ _ _ _ _ _
+_ P _ _ _ _ _ _
+_ K _ _ _ _ _ _
+_ _ _ _ _ _ _ _
+Move: 1
+Turn: 1
 File name: quicksave.txt
