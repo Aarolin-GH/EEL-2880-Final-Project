@@ -67,7 +67,7 @@ int main(void) {
   /*-1 = New Game, 0 = In Menu, 1 = In Progress, 2+ = Game Over*/
   char boardState[8][8] = {0}, doExit = 'n', selection,
        displayMessage[100] = {0};
-  char inputmove[8], validmove[8] = {0}, boardToLoad[100];
+  char inputmove[8], validmove[8] = {0}, boardToLoad[100]={0};
   FILE *testptr;
 
   while (1) {
