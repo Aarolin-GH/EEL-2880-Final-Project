@@ -1,3 +1,12 @@
+/* Text Chess
+EEL 2880 - Final Project
+
+Written by:
+  Andrew Coley 
+  Chance Miller
+
+*/
+
 #include "conio.h"
 #include <ctype.h>
 #include <stdio.h>
@@ -961,13 +970,13 @@ XYxyKM = White King Move (Depower White Rooks)
     }
 
     if (inputMove[4] == 'E') {
-      boardState[coords_end[1] + 1][coords_end[0]] = '_';
+      boardState[coords_end[y] + 1][coords_end[x]] = '_';
     } // White En-Passant
     if (inputMove[4] == 'e') {
-      boardState[coords_end[1] - 1][coords_end[0]] = '_';
+      boardState[coords_end[y] - 1][coords_end[x]] = '_';
     } // Black En-Passant
 
-    boardState[coords_start[1]][coords_start[0]] = '_';
+    boardState[coords_start[y]][coords_start[x]] = '_';
   } // Normal Piece Movement
 }
 
@@ -1428,3 +1437,5 @@ void printcheckmate(void){
   printf("    | ||_|| ||   _   |  |   |  |   |___\n");
   printf("    |_|   |_||__| |__|  |___|  |_______|\n");
 }
+//Thank you for reading!
+//Jesus Loves You!
