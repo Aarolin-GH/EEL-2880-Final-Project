@@ -75,6 +75,7 @@ int main(void) {
     switch (gameState) {
     case -1:
     case 0:
+
       system("clear");
       printTitle();
       printf("\n%s\n\n", displayMessage);
@@ -92,7 +93,11 @@ int main(void) {
         gameState = 1;
         break;
       case '2':
-        loadBoard(boardState, &moveNumber, &turn, "quicksave.txt");
+        if((testptr=fopen("quicksave.txt","r"))!=NULL){
+        loadBoard(boardState, &moveNumber, &turn, "quicksave.txt");}
+        else{
+          loadBoard(boardState, &moveNumber, &turn, defaultBoard);
+            }
         gameState = 1;
         break;
       case '3':
@@ -112,6 +117,7 @@ int main(void) {
         strcat(boardToLoad, "_save.txt");
         if ((testptr = fopen(boardToLoad, "r")) == NULL) {
           strcpy(displayMessage, "Save File was not Found.");
+            fclose(testptr);
         } else {
           loadBoard(boardState, &moveNumber, &turn, boardToLoad);
           gameState = 1;
